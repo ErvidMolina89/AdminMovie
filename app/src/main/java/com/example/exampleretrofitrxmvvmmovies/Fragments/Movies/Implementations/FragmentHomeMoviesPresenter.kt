@@ -7,18 +7,17 @@ import com.example.exampleretrofitrxmvvmmovies.Fragments.Movies.Interfaces.IFrag
 import com.example.exampleretrofitrxmvvmmovies.Fragments.Movies.Interfaces.IFragmentHomeMoviesView
 import com.example.exampleretrofitrxmvvmmovies.Models.MessageResponse
 import com.example.exampleretrofitrxmvvmmovies.Models.Movie
+import com.example.exampleretrofitrxmvvmmovies.Models.MoviesResponse
 
-class FragmentHomeMoviesPresenter (context: Context, view : IFragmentHomeMoviesView):
+class FragmentHomeMoviesPresenter (view : IFragmentHomeMoviesView):
     IFragmentHomeMoviesPresenter {
 
     private val selectView : IFragmentHomeMoviesView
-    private val context : Context
     private val selectItemBL : IFragmentHomeMoviesBL
 
     init {
-        this.context = context
         this.selectView = view
-        this.selectItemBL = FragmentHomeMoviesBL(Listener(), context)
+        this.selectItemBL = FragmentHomeMoviesBL(Listener())
     }
 
     override fun callService() {
@@ -28,8 +27,8 @@ class FragmentHomeMoviesPresenter (context: Context, view : IFragmentHomeMoviesV
 
 
     private inner class Listener : IFragmentHomeMoviesListener {
-        override fun responseHomeMovies(movies: MutableList<Movie>) {
-            selectView.responseHomeMovies(movies)
+        override fun responseHomeMovies(movies: MoviesResponse) {
+            selectView.responseHomeMovies(movies.results?.toMutableList()!!)
         }
 
         override fun failureService(response: MessageResponse) {

@@ -33,7 +33,7 @@ class FragmentMovie : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_movies, container, false)
         rv_movies_list = view.findViewById(R.id.recyclerView)
-        presenter = context?.let { FragmentHomeMoviesPresenter(it, actionPresenter) }
+        presenter = FragmentHomeMoviesPresenter( actionPresenter)
         recyclerView()
         listenerRevycler()
         return view

@@ -2,6 +2,9 @@ package com.example.exampleretrofitrxmvvmmovies.Fragments.Movies.Implementations
 
 import android.annotation.SuppressLint
 import android.content.Context
+import com.example.exampleretrofitrxmvvmmovies.Base.App
+import com.example.exampleretrofitrxmvvmmovies.Database.IMovieResponder
+import com.example.exampleretrofitrxmvvmmovies.Database.IResponder
 import com.example.exampleretrofitrxmvvmmovies.Database.MovieRepository
 import com.example.exampleretrofitrxmvvmmovies.Fragments.Movies.Interfaces.IFragmentHomeMoviesBL
 import com.example.exampleretrofitrxmvvmmovies.Fragments.Movies.Interfaces.IFragmentHomeMoviesListener
@@ -12,29 +15,22 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
 
-class FragmentHomeMoviesBL (listener : IFragmentHomeMoviesListener, context: Context):
+class FragmentHomeMoviesBL (listener : IFragmentHomeMoviesListener):
     IFragmentHomeMoviesBL {
 
-    private val context : Context
     private val listener : IFragmentHomeMoviesListener
-    private val movieRepository: MovieRepository?
+    private val movieRepository: IMovieResponder?
 
     init {
-        this.context = context
         this.listener = listener
-        this.movieRepository = MovieRepository()
+        this.movieRepository = MovieRepository(responderMovieRepsitory())
     }
 
     @SuppressLint("CheckResult")
     override fun callService() {
         try {
-            if (isNetworkAvailable(context)) {
+            if (isNetworkAvailable(App.mContext!!)) {
                 movieRepository?.getMovies()
-                    ?.subscribeOn(Schedulers.io())
-                    ?.observeOn(AndroidSchedulers.mainThread())
-                    ?.subscribe(
-                        { handleResponse(it) },
-                        { handleError(it) })
             }
         } catch (e: Exception) {
             print("Error: ${e.message}")
@@ -42,12 +38,14 @@ class FragmentHomeMoviesBL (listener : IFragmentHomeMoviesListener, context: Con
 
     }
 
-    private fun handleResponse(response: MoviesResponse) {
-        listener.responseHomeMovies(response.results?.toMutableList()!!)
-    }
+    private inner class responderMovieRepsitory : IResponder {
+        override fun onSuccess(moviesResponse: MoviesResponse) {
+            listener.responseHomeMovies(moviesResponse)
+        }
 
-    private fun handleError(error: Throwable) {
-        listener.failureService(MessageResponse(error.hashCode().toString(), error.message))
+        override fun onError(error: MessageResponse) {
+            listener.failureService(error)
+        }
     }
 
 }
